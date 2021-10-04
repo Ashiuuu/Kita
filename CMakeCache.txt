@@ -225,7 +225,10 @@ Project_SDL_sub_SOURCE_DIR:STATIC=/home/zeus/Downloads/Project_SDL_Part1_base_zi
 SDL2_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/SDL2
 
 //The directory containing a CMake configuration file for SDL2_IMAGE.
-SDL2_IMAGE_DIR:PATH=SDL2_IMAGE_DIR-NOTFOUND
+SDL2_IMAGE_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/sdl2_image
+
+//The directory containing a CMake configuration file for SDL2_image.
+SDL2_image_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/sdl2_image
 
 
 ########################

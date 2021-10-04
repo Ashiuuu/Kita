@@ -1,6 +1,7 @@
 #include "Project_SDL1.h"
 #include <stdio.h>
 #include <string>
+#include <vector>
 
 int main(int argc, char* argv[]) {
 
@@ -15,7 +16,7 @@ int main(int argc, char* argv[]) {
 
   std::cout << "Done with initilization" << std::endl;
 
-  application_t my_app(std::stoul(argv[1]), std::stoul(argv[2]));
+  application my_app(std::stoul(argv[1]), std::stoul(argv[2]));
 
   std::cout << "Created window" << std::endl;
 

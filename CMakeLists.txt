@@ -2,6 +2,8 @@
 
 project ("Project_SDL1")
 
+
+
 set (CMAKE_CXX_STANDARD 17)
 
 # Schließen Sie Unterprojekte ein.

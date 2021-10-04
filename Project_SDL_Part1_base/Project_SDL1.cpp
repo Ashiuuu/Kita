@@ -28,7 +28,7 @@ namespace {
 // Its purpose is to indicate to the compiler that everything
 // inside of it is UNIQUELY used within this source file.
 
-SDL_Surface* load_surface_for(const std::string& path,
+SDL_Surface* load_surface_for(const char* path,
                               SDL_Surface* window_surface_ptr) {
   // Helper function to load a png for a specific surface
   // See SDL_ConvertSurface
@@ -44,13 +44,13 @@ SDL_Surface* load_surface_for(const std::string& path,
   return ret;
 }
 } // namespace
-sheep::sheep()
+sheep::sheep() : animal::animal(//TODO)
 {
-  load_surface_for("/media/sheep.png",&this.image_ptr_);
+  load_surface_for("/media/sheep.png",&(this.image_ptr__));
 }
-wolf::wolf()
+wolf::wolf() : animal::animal(//TODO)
 {
-  load_surface_for("/media/wolf.png",&this.image_ptr_);
+  load_surface_for("/media/wolf.png",&(this.image_ptr_));
 }
 
 animal::animal(const std::string& file_path, SDL_Surface* window_surface_ptr) {
@@ -63,8 +63,12 @@ animal::animal(const std::string& file_path, SDL_Surface* window_surface_ptr) {
   spd = Vector2{((float) rand()/RAND_MAX )* 20 - 10, ((float) rand()/RAND_MAX )* 20 - 10};
 }
 
-animal::~animal() {
+animal::~animal()
+  // C'est pas a animal de free le pointeur
     SDL_FreeSurface(this->image_ptr_);
-    delete(pos);
-    delete(spd);
+}
+
+void animal::draw() {
+  SDL_Rect dst_rect = SDL_Rect(this->pos.x, this->pos.y, this->pos.x + this->image_ptr_->w, this->pos.y + this->image_ptr_->h);
+  SDL_BlitSurface(this->image_ptr_, NULL, this->window_surface_ptr_, &dst_rect);
 }

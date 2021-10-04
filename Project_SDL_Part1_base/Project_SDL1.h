@@ -50,7 +50,7 @@ public:
                  // Note that this function is not virtual, it does not depend
                  // on the static type of the instance
 
-  virtual void move(){} = 0; // todo: Animals move around, but in a different
+  virtual void move(){}; // todo: Animals move around, but in a different
                              // fashion depending on which type of animal
 };
 
@@ -74,7 +74,7 @@ class ground {
 private:
   // Attention, NON-OWNING ptr, again to the screen
   SDL_Surface* window_surface_ptr_;
-  vector<animal*> animals;
+  std::vector<animal*> animals;
   
   // Some attribute to store all the wolves and sheep
   // here
@@ -93,9 +93,9 @@ private:
   // The following are OWNING ptrs
   SDL_Window* window_ptr_;
   SDL_Surface* window_surface_ptr_;
-  SDL_Event window_event_;r
+  SDL_Event window_event_;
 
-  / Other attributes here, for example an instance of ground
+  // Other attributes here, for example an instance of ground
   ground* my_ground;
 
 public:
