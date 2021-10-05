@@ -1,7 +1,7 @@
 #include "Project_SDL1.h"
 #include <stdio.h>
 #include <string>
-#include <vector>
+
 
 int main(int argc, char* argv[]) {
 
@@ -14,9 +14,11 @@ int main(int argc, char* argv[]) {
 
   init();
 
+  srand(time(NULL));
+
   std::cout << "Done with initilization" << std::endl;
 
-  application my_app(std::stoul(argv[1]), std::stoul(argv[2]));
+  application my_app = application(std::stoul(argv[1]), std::stoul(argv[2]));
 
   std::cout << "Created window" << std::endl;
 

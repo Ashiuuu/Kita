@@ -10,7 +10,6 @@
 #include <memory>
 #include <optional>
 #include <vector>
-
 // Defintions
 constexpr double frame_rate = 60.0; // refresh rate
 constexpr double frame_time = 1. / frame_rate;
@@ -33,14 +32,17 @@ class animal {
 private:
   SDL_Surface* window_surface_ptr_; // ptr to the surface on which we want the
                                     // animal to be drawn, also non-owning
+  // todo: Attribute(s) to define its position
+  std::string file_path;
+protected:
   SDL_Surface* image_ptr_; // The texture of the sheep (the loaded image), use
                            // load_surface_for
-  // todo: Attribute(s) to define its position
   Vector2 pos;
   Vector2 spd;
-
+  
 public:
-  animal(const std::string& file_path, SDL_Surface* window_surface_ptr);
+  
+  explicit animal(const std::string& file_path, SDL_Surface* window_surface_ptr);
   // todo: The constructor has to load the sdl_surface that corresponds to the
   // texture
   ~animal(); // todo: Use the destructor to release memory and "clean up
@@ -57,14 +59,28 @@ public:
 // Insert here:
 // class sheep, derived from animal
 class sheep : public animal {
-  sheep();
-  ~sheep();
+  public:
+    sheep(SDL_Surface *window_surface_ptr) : animal::animal("../media/sheep.png", window_surface_ptr){
+      float newmovex = ((float) rand()/RAND_MAX )* 2 - 1;
+      float newmovey = ((float) rand()/RAND_MAX )* 2 - 1;
+
+      this->spd.x = newmovex;
+      this->spd.y = newmovey;
+    }
+    void move() final;
   // implement functions that are purely virtual in base class
 };
 
 class wolf : public animal {
-  wolf();
-  ~wolf();
+  public:
+    wolf(SDL_Surface *window_surface_ptr) : animal::animal("../media/wolf.png", window_surface_ptr){
+      float newmovex = ((float) rand()/RAND_MAX )* 2 - 1;
+      float newmovey = ((float) rand()/RAND_MAX )* 2 - 1;
+
+      this->spd.x = newmovex;
+      this->spd.y = newmovey;
+    }
+    void move() final;
   // implement functions that are purely virtual in base class
 };
 
@@ -81,7 +97,7 @@ private:
 
 public:
   ground(SDL_Surface* window_surface_ptr); // todo: Ctor
-  ~ground(){}; // todo: Dtor, again for clean up (if necessary)
+  ~ground(); // todo: Dtor, again for clean up (if necessary)
   void add_animal(animal *a); // todo: Add an animal
   void update(); // todo: "refresh the screen": Move animals and draw them
   // Possibly other methods, depends on your implementation
@@ -99,10 +115,10 @@ private:
   ground* my_ground;
 
 public:
-  application(unsigned n_sheep, unsigned n_wolf); // Ctor
+  application(unsigned int n_sheep, unsigned int n_wolf); // Ctor
   ~application();                                 // dtor
 
-  int loop(unsigned period); // main loop of the application.
+  int loop(unsigned int period); // main loop of the application.
                              // this ensures that the screen is updated
                              // at the correct rate.
                              // See SDL_GetTicks() and SDL_Delay() to enforce a

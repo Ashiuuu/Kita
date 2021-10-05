@@ -1,0 +1,1 @@
+/usr/bin/cc     -v -rdynamic CMakeFiles/cmTC_d304d.dir/CMakeCCompilerABI.c.o  -o cmTC_d304d 
