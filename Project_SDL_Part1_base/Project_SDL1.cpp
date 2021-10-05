@@ -57,6 +57,9 @@ wolf::wolf(SDL_SURFACE *window_surface_ptr) : animal::animal("./media/wolf.png",
 }
 */
 
+/*
+Animal
+*/
 
 animal::animal(const std::string& file_path, SDL_Surface* window_surface_ptr) {
   this->window_surface_ptr_ = window_surface_ptr;
@@ -86,27 +89,47 @@ void animal::draw() {
   SDL_BlitSurface(this->image_ptr_, NULL, this->window_surface_ptr_, &dst_rect);
 }
 
-application::application(unsigned int n_sheep, unsigned int n_wolf) {
-    this->window_ptr_ = SDL_CreateWindow("Rust>C++", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, frame_width, frame_height, SDL_WINDOW_SHOWN);
-    if (this->window_ptr_ == NULL) {
-      std::cout << std::string(SDL_GetError()) << std::endl;
-      abort();
-    }
-    this->window_surface_ptr_ = SDL_GetWindowSurface(this->window_ptr_);
-    if (this->window_surface_ptr_ == NULL) {
-      std::cout << std::string(SDL_GetError()) << std::endl;
-      abort();
-    }
-    this->my_ground = new ground(this->window_surface_ptr_);
 
-    for (unsigned i = 0 ; i < n_sheep ; ++i)
-        this->my_ground->add_animal(new sheep(this->window_surface_ptr_));
 
-    for (unsigned i = 0; i < n_wolf ; ++i)
-        this->my_ground->add_animal(new wolf(this->window_surface_ptr_));
+
+
+
+
+
+
+
+
+
+/*
+Wolf
+*/
+
+void wolf::move()
+{
+  //srand(time(NULL));
+  //float newmovex = ((float) rand()/RAND_MAX )* 2 - 1;
+  //float newmovey = ((float) rand()/RAND_MAX )* 2 - 1;
+  
+  if (this->pos.x + this->spd.x < 0 || this->pos.x + this->spd.x > frame_width - this->image_ptr_->w)
+    this->spd.x = -this->spd.x;
+  if (this->pos.y + this->spd.y < 0 || this->pos.y + this->spd.y > frame_height - this->image_ptr_->h)
+    this->spd.y = -this->spd.y;
+  this->pos.x += this->spd.x;
+  this->pos.y  += this->spd.y;
 }
 
 
+
+
+
+
+
+
+
+
+/*
+ Sheep 
+ */
 void sheep::move()
 {
   //srand(time(NULL));
@@ -123,6 +146,32 @@ void sheep::move()
   this->pos.y  += this->spd.y;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+Ground
+*/
 ground::ground(SDL_Surface* window_surface_ptr)
 {
     this->window_surface_ptr_ = window_surface_ptr;
@@ -146,18 +195,38 @@ void ground::update()
 } // todo: "refresh the screen": Move animals and draw them
 
 
-void wolf::move()
-{
-  //srand(time(NULL));
-  //float newmovex = ((float) rand()/RAND_MAX )* 2 - 1;
-  //float newmovey = ((float) rand()/RAND_MAX )* 2 - 1;
-  
-  if (this->pos.x + this->spd.x < 0 || this->pos.x + this->spd.x > frame_width - this->image_ptr_->w)
-    this->spd.x = -this->spd.x;
-  if (this->pos.y + this->spd.y < 0 || this->pos.y + this->spd.y > frame_height - this->image_ptr_->h)
-    this->spd.y = -this->spd.y;
-  this->pos.x += this->spd.x;
-  this->pos.y  += this->spd.y;
+
+
+
+
+
+
+
+
+/*
+Application
+*/
+
+
+
+application::application(unsigned int n_sheep, unsigned int n_wolf) {
+    this->window_ptr_ = SDL_CreateWindow("Rust>C++", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, frame_width, frame_height, SDL_WINDOW_SHOWN);
+    if (this->window_ptr_ == NULL) {
+      std::cout << std::string(SDL_GetError()) << std::endl;
+      abort();
+    }
+    this->window_surface_ptr_ = SDL_GetWindowSurface(this->window_ptr_);
+    if (this->window_surface_ptr_ == NULL) {
+      std::cout << std::string(SDL_GetError()) << std::endl;
+      abort();
+    }
+    this->my_ground = new ground(this->window_surface_ptr_);
+
+    for (unsigned i = 0 ; i < n_sheep ; ++i)
+        this->my_ground->add_animal(new sheep(this->window_surface_ptr_));
+
+    for (unsigned i = 0; i < n_wolf ; ++i)
+        this->my_ground->add_animal(new wolf(this->window_surface_ptr_));
 }
 
 application::~application() {
@@ -166,10 +235,11 @@ application::~application() {
     SDL_DestroyWindow(this->window_ptr_);
 }
 
+
+
 int application::loop(unsigned int period) {
     bool close = false;
 
-    
 
     while (!close) {
         while (SDL_PollEvent(&this->window_event_)) {
@@ -185,7 +255,8 @@ int application::loop(unsigned int period) {
         this->my_ground->update();
         
         SDL_UpdateWindowSurface(this->window_ptr_);
-    }
+        SDL_Delay(frame_time * 1000);
+  }
 
     return 0;
 }
