@@ -75,8 +75,10 @@ animal::animal(const std::string& file_path, SDL_Surface* window_surface_ptr) {
   S[file_path.length()] = 0;
   this->image_ptr_ = load_surface_for(S, window_surface_ptr);
 
-  this->pos = Vector2{((float) rand()/RAND_MAX )* 720,((float) rand()/RAND_MAX )* 480};
-  this->spd = Vector2{((float) rand()/RAND_MAX )* 20 - 10, ((float) rand()/RAND_MAX )* 20 - 10};
+  // 0 + boundary < x < frame_width - boundary
+  // 0 + boundary < y < frame_height - boundary
+  this->pos = Vector2{frame_width / 2, frame_height / 2};
+  this->spd = Vector2{((float) rand()/RAND_MAX )* 80 - 40, ((float) rand()/RAND_MAX )* 80 - 40};
 }
 
 animal::~animal(){
@@ -110,9 +112,9 @@ void wolf::move()
   //float newmovex = ((float) rand()/RAND_MAX )* 2 - 1;
   //float newmovey = ((float) rand()/RAND_MAX )* 2 - 1;
   
-  if (this->pos.x + this->spd.x < 0 || this->pos.x + this->spd.x > frame_width - this->image_ptr_->w)
+  if (this->pos.x + this->spd.x < frame_boundary || this->pos.x + this->spd.x > frame_width - this->image_ptr_->w - frame_boundary)
     this->spd.x = -this->spd.x;
-  if (this->pos.y + this->spd.y < 0 || this->pos.y + this->spd.y > frame_height - this->image_ptr_->h)
+  if (this->pos.y + this->spd.y < frame_boundary || this->pos.y + this->spd.y > frame_height - this->image_ptr_->h - frame_boundary)
     this->spd.y = -this->spd.y;
   this->pos.x += this->spd.x;
   this->pos.y  += this->spd.y;
@@ -138,9 +140,13 @@ void sheep::move()
   float newmovey = ((float) rand()/RAND_MAX )* 2 - 1;
   this->spd.x += newmovex;
   this->spd.y  += newmovey;*/
-  if (this->pos.x + this->spd.x < 0 ||this->pos.x + this->spd.x > frame_width - 67)
+  /*if (this->pos.x + this->spd.x < 0 ||this->pos.x + this->spd.x > frame_width - 67)
     this->spd.x = -this->spd.x;
   if (this->pos.y + this->spd.y < 0 ||this->pos.y + this->spd.y > frame_height - 71)
+    this->spd.y = -this->spd.y;*/
+  if (this->pos.x + this->spd.x < frame_boundary || this->pos.x + this->spd.x > frame_width - this->image_ptr_->w - frame_boundary)
+    this->spd.x = -this->spd.x;
+  if (this->pos.y + this->spd.y < frame_boundary || this->pos.y + this->spd.y > frame_height - this->image_ptr_->h - frame_boundary)
     this->spd.y = -this->spd.y;
   this->pos.x  += this->spd.x;
   this->pos.y  += this->spd.y;
