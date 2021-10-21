@@ -246,8 +246,10 @@ application::~application() {
 int application::loop(unsigned int period) {
     bool close = false;
 
+    unsigned int elapsed_time = 0;
 
-    while (!close) {
+    while (!close && elapsed_time < period * 1000) {
+        unsigned int loop_begin = SDL_GetTicks();
         while (SDL_PollEvent(&this->window_event_)) {
             switch (this->window_event_.type) {
                 case SDL_QUIT:
@@ -261,7 +263,15 @@ int application::loop(unsigned int period) {
         this->my_ground->update();
         
         SDL_UpdateWindowSurface(this->window_ptr_);
-        SDL_Delay(frame_time * 1000);
+        unsigned int loop_end = SDL_GetTicks();
+        unsigned int delta = loop_end - loop_begin;
+        if (delta < frame_time * 1000) {
+            SDL_Delay(frame_time * 1000 - delta);
+            elapsed_time += frame_time * 1000;
+        } else {
+            elapsed_time += delta;
+        }
+        //SDL_Delay(frame_time * 1000);
   }
 
     return 0;

@@ -6,3 +6,5 @@ Makefile
 *.pdf
 *.cmake
 *.bin
+*.swp
+SDL_part1
