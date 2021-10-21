@@ -86,7 +86,7 @@ animal::animal(const std::string& file_path, SDL_Surface* window_surface_ptr) {
   this->pos = Vector2{get_rand_float(frame_boundary, frame_width - frame_boundary - this->image_ptr_->w),
                       get_rand_float(frame_boundary, frame_height - frame_boundary - this->image_ptr_->h)};
   //this->spd = Vector2{((float) rand()/RAND_MAX )* 80 - 40, ((float) rand()/RAND_MAX )* 80 - 40};
-  this->spd = Vector2{get_rand_float(40, 80), get_rand_float(40, 80)};
+  this->spd = Vector2{get_rand_float(-40, 40), get_rand_float(-40, 40)};
 }
 
 animal::~animal(){
