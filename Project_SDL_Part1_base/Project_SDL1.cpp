@@ -48,6 +48,11 @@ SDL_Surface* load_surface_for(const char* path,
   return ret;
 }
 } // namespace
+
+float get_rand_float(int low, int high) {
+    return low + rand() / (RAND_MAX / (high - low + 1) + 1);
+}
+
 /*
 sheep::sheep(SDL_SURFACE *window_surface_ptr) : animal::animal("./media/sheep.png", window_surface_ptr)
 {
@@ -77,8 +82,11 @@ animal::animal(const std::string& file_path, SDL_Surface* window_surface_ptr) {
 
   // 0 + boundary < x < frame_width - boundary
   // 0 + boundary < y < frame_height - boundary
-  this->pos = Vector2{frame_width / 2, frame_height / 2};
-  this->spd = Vector2{((float) rand()/RAND_MAX )* 80 - 40, ((float) rand()/RAND_MAX )* 80 - 40};
+  //this->pos = Vector2{frame_width / 2, frame_height / 2};
+  this->pos = Vector2{get_rand_float(frame_boundary, frame_width - frame_boundary - this->image_ptr_->w),
+                      get_rand_float(frame_boundary, frame_height - frame_boundary - this->image_ptr_->h)};
+  //this->spd = Vector2{((float) rand()/RAND_MAX )* 80 - 40, ((float) rand()/RAND_MAX )* 80 - 40};
+  this->spd = Vector2{get_rand_float(40, 80), get_rand_float(40, 80)};
 }
 
 animal::~animal(){
