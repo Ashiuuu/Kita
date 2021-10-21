@@ -60,14 +60,14 @@ public:
 // class sheep, derived from animal
 class sheep : public animal {
   public:
-    sheep(SDL_Surface *window_surface_ptr) : animal::animal("../media/sheep.png", window_surface_ptr){}
+    sheep(SDL_Surface *window_surface_ptr) : animal::animal("media/sheep.png", window_surface_ptr){}
     void move() final;
   // implement functions that are purely virtual in base class
 };
 
 class wolf : public animal {
   public:
-    wolf(SDL_Surface *window_surface_ptr) : animal::animal("../media/wolf.png", window_surface_ptr){}
+    wolf(SDL_Surface *window_surface_ptr) : animal::animal("media/wolf.png", window_surface_ptr){}
     void move() final;
   // implement functions that are purely virtual in base class
 };
