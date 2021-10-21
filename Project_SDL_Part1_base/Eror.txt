@@ -1,4 +1,0 @@
-Scanning dependencies of target SDL_part1
-[ 33%] Building CXX object Project_SDL_Part1_base/CMakeFiles/SDL_part1.dir/Project_SDL1.cpp.o
-[ 66%] Linking CXX executable SDL_part1
-[100%] Built target SDL_part1
