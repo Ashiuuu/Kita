@@ -28,12 +28,6 @@ struct Vector2
   float y;
 };
 
-Vector2 sub_vector(const Vector2 &a, const Vector2 &b);
-Vector2 mul_vector(const Vector2 &a, float b);
-float vector_norm(const Vector2 &a);
-float vector_distance(const Vector2 &a, const Vector2 &b);
-Vector2 normalize_vector(const Vector2 &a);
-
 class animal {
 private:
   SDL_Surface* window_surface_ptr_; // ptr to the surface on which we want the
@@ -43,10 +37,8 @@ private:
 protected:
   SDL_Surface* image_ptr_; // The texture of the sheep (the loaded image), use
                            // load_surface_for
-  Vector2 spd;
-public:
   Vector2 pos;
-  
+  Vector2 spd;
   
 public:
   
@@ -64,20 +56,9 @@ public:
                              // fashion depending on which type of animal
 };
 
-class shepherd {
-  public:
-    shepherd();
-
-  private:
-    Vector2 pos;
-};
-
 // Insert here:
 // class sheep, derived from animal
 class sheep : public animal {
-  public:
-    bool male;
-    long cooldown;
   public:
     sheep(SDL_Surface *window_surface_ptr) : animal::animal("media/sheep.png", window_surface_ptr){}
     void move() final;
@@ -91,29 +72,21 @@ class wolf : public animal {
   // implement functions that are purely virtual in base class
 };
 
-class dog : public animal {
-  public:
-    dog(SDL_Surface *window_surface_ptr) : animal::animal("", window_surface_ptr){}
-    void move(const shepherd &player);
-};
-
-
-
 // The "ground" on which all the animals live (like the std::vector
 // in the zoo example).
 class ground {
 private:
   // Attention, NON-OWNING ptr, again to the screen
   SDL_Surface* window_surface_ptr_;
-  std::vector<wolf*> wolfs;
-  std::vector<sheep*> sheeps;
+  std::vector<animal*> animals;
+  
   // Some attribute to store all the wolves and sheep
   // here
 
 public:
   ground(SDL_Surface* window_surface_ptr); // todo: Ctor
   ~ground(); // todo: Dtor, again for clean up (if necessary)
-  void add_animal(animal *a,bool issheep); // todo: Add an animal
+  void add_animal(animal *a); // todo: Add an animal
   void update(); // todo: "refresh the screen": Move animals and draw them
   // Possibly other methods, depends on your implementation
 };

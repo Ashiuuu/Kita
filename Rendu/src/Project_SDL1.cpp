@@ -9,7 +9,6 @@
 #include <numeric>
 #include <random>
 #include <string>
-#include <math.h>
 
 void init() {
   // Initialize SDL
@@ -54,26 +53,14 @@ float get_rand_float(int low, int high) {
     return low + rand() / (RAND_MAX / (high - low + 1) + 1);
 }
 
-Vector2 sub_vector(const Vector2 &a, const Vector2 &b) {
-  return Vector2(b.x - a.x, b.y - a.y);
+/*
+sheep::sheep(SDL_SURFACE *window_surface_ptr) : animal::animal("./media/sheep.png", window_surface_ptr)
+{
 }
-
-Vector2 mul_vector(const Vector2 &a, float b) {
-  return Vector2(a.x * b, a.y * b);
+wolf::wolf(SDL_SURFACE *window_surface_ptr) : animal::animal("./media/wolf.png", *window_surface_ptr)
+{
 }
-
-float vector_norm(const Vector2 &a) {
-  return sqrt(a.x * a.x + a.y * a.y);
-}
-
-float vector_distance(const Vector2 &a, const Vector2 &b) {
-  return vector_norm(sub_vector(a, b));
-}
-
-Vector2 normalize_vector(const Vector2 &a) {
-  float norm = vector_norm(a);
-  return Vector2(a.x / norm, a.y / norm);
-}
+*/
 
 /*
 Animal
@@ -99,7 +86,7 @@ animal::animal(const std::string& file_path, SDL_Surface* window_surface_ptr) {
   this->pos = Vector2{get_rand_float(frame_boundary, frame_width - frame_boundary - this->image_ptr_->w),
                       get_rand_float(frame_boundary, frame_height - frame_boundary - this->image_ptr_->h)};
   //this->spd = Vector2{((float) rand()/RAND_MAX )* 80 - 40, ((float) rand()/RAND_MAX )* 80 - 40};
-  this->spd = Vector2{5,5};
+  this->spd = Vector2{get_rand_float(-40, 40), get_rand_float(-40, 40)};
 }
 
 animal::~animal(){
@@ -153,19 +140,18 @@ void wolf::move()
 /*
  Sheep 
  */
-
-sheep::sheep(SDL_Surface *window_surface_ptr)
-{
-  if (get_rand_float(0,1) > 0)
-    male = true;
-  else
-    cooldown = 500;  
-}
-
 void sheep::move()
-{ 
-  if (this->cooldown > 0)
-    this->cooldown--;
+{
+  //srand(time(NULL));
+  
+  /*float newmovex = ((float) rand()/RAND_MAX )* 2 - 1;
+  float newmovey = ((float) rand()/RAND_MAX )* 2 - 1;
+  this->spd.x += newmovex;
+  this->spd.y  += newmovey;*/
+  /*if (this->pos.x + this->spd.x < 0 ||this->pos.x + this->spd.x > frame_width - 67)
+    this->spd.x = -this->spd.x;
+  if (this->pos.y + this->spd.y < 0 ||this->pos.y + this->spd.y > frame_height - 71)
+    this->spd.y = -this->spd.y;*/
   if (this->pos.x + this->spd.x < frame_boundary || this->pos.x + this->spd.x > frame_width - this->image_ptr_->w - frame_boundary)
     this->spd.x = -this->spd.x;
   if (this->pos.y + this->spd.y < frame_boundary || this->pos.y + this->spd.y > frame_height - this->image_ptr_->h - frame_boundary)
@@ -179,30 +165,9 @@ void sheep::move()
 
 
 
-void dog::move(const shepherd &player) {
-  Vector2 pos = player.pos;
 
-  Vector2 vector_to_player = sub_vector(this->pos, player.pos);
-  Vector2 unit_vector = normalize_vector(vector_to_player);
-  float distance_to_player = vector_norm(vector_to_player);
 
-  if (distance_to_player > 10.5) {
-    this->spd = mul_vector(unit_vector, 10);
-  } else if (distance_to_player < 9.5) {
-    this->spd = mul_vector(unit_vector, -10);
-  } else {
-    if (unit_vector.y < 0) {
-      unit_vector.x = unit_vector.x * (-1);
-    } else {
-      unit_vector.y = unit_vector.y * (-1);
-    }
-  }
 
-  this->spd = mul(unit_vector(10));
-  
-  this->pos.x  += this->spd.x;
-  this->pos.y  += this->spd.y;
-}
 
 
 
@@ -229,44 +194,16 @@ ground::~ground()
 {
     SDL_FreeSurface(this->window_surface_ptr_);
 } // todo: Dtor, again for clean up (if necessary)
-void ground::add_animal(animal* a,bool issheep)
+void ground::add_animal(animal* a)
 {
-  if (!issheep)
-    wolfs->push_back((wolf*)a);
-  else
-    sheeps->push_back((sheep*)a);
+    this->animals.push_back(a);
 }// todo: Add an animal
 void ground::update()
 {
   //for (auto &animal : this->animals) {
-  for (unsigned i = 0; i < this->sheeps.size(); ++i) {
-      sheeps[i]->move();
-      sheeps[i]->draw();
-  }
-  for (unsigned i = 0; i < this->wolfs.size(); ++i) {
-      wolfs[i]->move();
-      wolfs[i]->draw();
-  }
-  for(unsigned int i = 0; i < sheeps.size(); i++) // D’ailleurs, i++ ou ++i ?
-  {
-      if (!sheeps[i]->male && sheeps[i]->cooldown == 0)
-      {
-        for(unsigned int k = 0; k < this->sheeps.size(); k++)
-        {
-          if (sheeps[i] == sheeps[k])
-            continue;
-          if (vector_distance(sheeps[i]->pos,sheeps[k]->pos) < 40)
-          {
-            sheep* baby = new sheep(this->window_surface_ptr_);
-            this->add_animal(baby,true);
-            baby->pos.x = sheeps[i]->pos.x;
-            baby->pos.y = sheeps[i]->pos.y;
-            sheeps[i]->cooldown = 500;
-          }
-        }
-      }
-        
-      
+  for (unsigned i = 0; i < this->animals.size(); ++i) {
+      animals[i]->move();
+      animals[i]->draw();
   }
     
 } // todo: "refresh the screen": Move animals and draw them
@@ -300,10 +237,10 @@ application::application(unsigned int n_sheep, unsigned int n_wolf) {
     this->my_ground = new ground(this->window_surface_ptr_);
 
     for (unsigned i = 0 ; i < n_sheep ; ++i)
-        this->my_ground->add_animal(new sheep(this->window_surface_ptr_),true);
+        this->my_ground->add_animal(new sheep(this->window_surface_ptr_));
 
     for (unsigned i = 0; i < n_wolf ; ++i)
-        this->my_ground->add_animal(new wolf(this->window_surface_ptr_),false);
+        this->my_ground->add_animal(new wolf(this->window_surface_ptr_));
 }
 
 application::~application() {
