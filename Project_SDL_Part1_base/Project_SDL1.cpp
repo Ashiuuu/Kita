@@ -332,6 +332,7 @@ ground::ground(SDL_Surface *window_surface_ptr)
 {
     this->window_surface_ptr_ = window_surface_ptr;
     this->player = new shepherd(window_surface_ptr);
+    this->doggo = new dog(window_surface_ptr);
 } // todo: Ctor
 
 ground::~ground()
@@ -350,6 +351,9 @@ void ground::update()
 {
     player->move();
     player->draw();
+
+    doggo->move(this->player->pos);
+    doggo->draw();
     // for (auto &animal : this->animals) {
     for (unsigned i = 0; i < this->sheeps.size(); ++i)
     {
@@ -388,14 +392,14 @@ void ground::update()
             }
         }
     }
-    std::vector<sheep *> tmp = std::vector(this->sheeps);
     for (unsigned int i = 0; i < wolfs.size(); ++i)
     {
-        for (auto j = tmp.begin(); j != tmp.end(); ++j)
+        for (auto j = this->sheeps.begin(); j != this->sheeps.end(); ++j)
         {
             if (vector_distance(wolfs[i]->pos, (*j)->pos) < 80)
             {
                 this->sheeps.erase(j);
+                break;
             }
         }
     }

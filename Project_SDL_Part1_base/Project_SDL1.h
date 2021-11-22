@@ -126,6 +126,7 @@ public:
     std::vector<wolf *> wolfs;
     std::vector<sheep *> sheeps;
     shepherd *player;
+    dog *doggo;
     ground(SDL_Surface *window_surface_ptr); // todo: Ctor
     ~ground(); // todo: Dtor, again for clean up (if necessary)
     void add_animal(animal *a, bool issheep); // todo: Add an animal
