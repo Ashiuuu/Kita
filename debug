@@ -1,7 +1,0 @@
-In file included from /home/zeus/School/Project_SDL_Part1_base_zip/Project_SDL_Part1_base/main.cpp:1:
-/home/zeus/School/Project_SDL_Part1_base_zip/Project_SDL_Part1_base/Project_SDL1.h:97:10: error: ‘void dog::move(const shepherd&)’ marked ‘final’, but is not virtual
-   97 |     void move(const shepherd &player) final;
-      |          ^~~~
-make[2]: *** [Project_SDL_Part1_base/CMakeFiles/SDL_part1.dir/build.make:63: Project_SDL_Part1_base/CMakeFiles/SDL_part1.dir/main.cpp.o] Error 1
-make[1]: *** [CMakeFiles/Makefile2:94: Project_SDL_Part1_base/CMakeFiles/SDL_part1.dir/all] Error 2
-make: *** [Makefile:84: all] Error 2
