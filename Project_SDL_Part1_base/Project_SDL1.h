@@ -35,8 +35,6 @@ float vector_distance(const Vector2 &a, const Vector2 &b);
 Vector2 normalize_vector(const Vector2 &a);
 
 class animal;
-class sheep;
-class wolf;
 
 class interacting_object
 {
@@ -48,27 +46,26 @@ public:
     Vector2 pos;
     Vector2 spd;
     bool has_attribute(const std::string &att);
-    virtual void interract(animal &other);
+    virtual void interract(animal &other){};
 
 protected:
     std::string attribute;
+    SDL_Surface *image_ptr_;
+    SDL_Surface *window_surface_ptr_;
 
 private:
-    SDL_Surface *window_surface_ptr_;
-    SDL_Surface *image_ptr_;
 };
 
 class animal : public interacting_object
 {
 private:
-    SDL_Surface *window_surface_ptr_; // ptr to the surface on which we want the
-                                      // animal to be drawn, also non-owning
     // todo: Attribute(s) to define its position
     std::string file_path;
 
 protected:
-    SDL_Surface *image_ptr_; // The texture of the sheep (the loaded image), use
-                             // load_surface_for
+    // SDL_Surface *image_ptr_; // The texture of the sheep (the loaded image),
+    // use
+    // load_surface_for
 
     float speed_norm = 5;
 
@@ -77,8 +74,8 @@ public:
                     SDL_Surface *window_surface_ptr);
     // todo: The constructor has to load the sdl_surface that corresponds to the
     // texture
-    ~animal(); // todo: Use the destructor to release memory and "clean up
-               // behind you"
+    ~animal(){}; // todo: Use the destructor to release memory and "clean up
+                 // behind you"
 
     void draw(); // todo: Draw the animal on the screen <-> window_surface_ptr.
                  // Note that this function is not virtual, it does not depend
@@ -95,7 +92,6 @@ class shepherd : public animal
 {
 public:
     shepherd(SDL_Surface *window_surface_ptr);
-    ~shepherd(){};
     void move() final;
     void interract(animal &other) final;
 };
@@ -134,11 +130,11 @@ private:
 class dog : public animal
 {
 private:
-    float circle_dist = 50;
+    float circle_dist = 500;
 
 public:
     dog(SDL_Surface *window_surface_ptr);
-    void move(const Vector2 &player);
+    void move();
     void interract(animal &other) final;
 };
 
