@@ -34,7 +34,31 @@ float vector_norm(const Vector2 &a);
 float vector_distance(const Vector2 &a, const Vector2 &b);
 Vector2 normalize_vector(const Vector2 &a);
 
-class animal
+class animal;
+class sheep;
+class wolf;
+
+class interacting_object
+{
+public:
+    interacting_object(SDL_Surface *window_surface_ptr,
+                       const std::string &path);
+
+    ~interacting_object();
+    Vector2 pos;
+    Vector2 spd;
+    bool has_attribute(const std::string &att);
+    virtual void interract(animal &other);
+
+protected:
+    std::string attribute;
+
+private:
+    SDL_Surface *window_surface_ptr_;
+    SDL_Surface *image_ptr_;
+};
+
+class animal : public interacting_object
 {
 private:
     SDL_Surface *window_surface_ptr_; // ptr to the surface on which we want the
@@ -47,10 +71,6 @@ protected:
                              // load_surface_for
 
     float speed_norm = 5;
-
-public:
-    Vector2 pos;
-    Vector2 spd;
 
 public:
     explicit animal(const std::string &file_path,
@@ -66,49 +86,60 @@ public:
 
     virtual void move(){}; // todo: Animals move around, but in a different
                            // fashion depending on which type of animal
+
+    bool male = true;
+    unsigned int hp;
 };
 
 class shepherd : public animal
 {
 public:
     shepherd(SDL_Surface *window_surface_ptr);
+    ~shepherd(){};
     void move() final;
+    void interract(animal &other) final;
 };
-
-// Insert here:
-class sheep;
 
 class wolf : public animal
 {
+private:
+    Vector2 closest_sheep;
+    Vector2 dog_position;
+    float closest_dist;
+    bool is_afraid = false;
+
 public:
-    wolf(SDL_Surface *window_surface_ptr)
-        : animal::animal("media/wolf.png", window_surface_ptr)
-    {}
+    wolf(SDL_Surface *window_surface_ptr);
     void move() final;
-    void detect(std::vector<sheep *> sheeplist);
+    void interract(animal &other) final;
+    // void detect(std::vector<sheep *> sheeplist);
     // implement functions that are purely virtual in base class
 };
 // class sheep, derived from animal
 class sheep : public animal
 {
 public:
-    bool male = false;
     long cooldown;
-
-public:
     sheep(SDL_Surface *window_surface_ptr);
     void move() final;
-    void detect(std::vector<wolf *> wolfslist);
+    void interract(animal &other) final;
+    // void detect(std::vector<wolf *> wolfslist);
     // implement functions that are purely virtual in base class
+
+private:
+    Vector2 closest_wolf;
+    float dist_wolf;
 };
 
 class dog : public animal
 {
+private:
+    float circle_dist = 50;
+
 public:
-    dog(SDL_Surface *window_surface_ptr)
-        : animal::animal("media/doggo.png", window_surface_ptr)
-    {}
+    dog(SDL_Surface *window_surface_ptr);
     void move(const Vector2 &player);
+    void interract(animal &other) final;
 };
 
 // The "ground" on which all the animals live (like the std::vector
@@ -123,13 +154,11 @@ private:
     // here
 
 public:
-    std::vector<wolf *> wolfs;
-    std::vector<sheep *> sheeps;
+    std::vector<std::unique_ptr<animal>> animals;
     shepherd *player;
     dog *doggo;
     ground(SDL_Surface *window_surface_ptr); // todo: Ctor
     ~ground(); // todo: Dtor, again for clean up (if necessary)
-    void add_animal(animal *a, bool issheep); // todo: Add an animal
     void update(); // todo: "refresh the screen": Move animals and draw them
     // Possibly other methods, depends on your implementation
 };
