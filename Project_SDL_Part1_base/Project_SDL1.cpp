@@ -10,6 +10,7 @@
 #include <numeric>
 #include <random>
 #include <string>
+#include <typeinfo>
 
 void init()
 {
@@ -61,48 +62,99 @@ float get_rand_float(int low, int high)
     return low + rand() / (RAND_MAX / (high - low + 1) + 1);
 }
 
-Vector2 sub_vector(const Vector2 &a, const Vector2 &b)
+Vector2::Vector2()
 {
-    // return Vector2(b.x - a.x, b.y - a.y);
-    return { b.x - a.x, b.y - a.y };
+    this->x = 0;
+    this->y = 0;
 }
 
-Vector2 mul_vector(const Vector2 &a, float b)
+Vector2::Vector2(float a, float b)
 {
-    // return Vector2(a.x * b, a.y * b);
-    return { a.x * b, a.y * b };
+    this->x = a;
+    this->y = b;
 }
 
-float vector_norm(const Vector2 &a)
+bool Vector2::is_nan()
 {
-    return sqrt(a.x * a.x + a.y * a.y);
+    return this->x != this->x || this->y != this->y;
+}
+
+void Vector2::operator+=(const Vector2 &a)
+{
+    this->x += a.x;
+    this->y += a.y;
+}
+
+Vector2 operator-(const Vector2 &a, const Vector2 &o)
+{
+    return Vector2(a.x - o.x, a.y - o.y);
+}
+
+Vector2 operator*(const Vector2 &a, float b)
+{
+    return Vector2(b * a.x, b * a.y);
+}
+
+std::ostream &operator<<(std::ostream &o, const Vector2 &a)
+{
+    return o << "(" << a.x << "," << a.y << ")";
+}
+
+float Vector2::get_norm() const
+{
+    float res = sqrt(this->x * this->x + this->y * this->y);
+    if (res != res)
+    {
+        std::cout << "NaN in get_norm" << std::endl;
+        abort();
+    }
+    return res;
+}
+
+Vector2 normalize(const Vector2 &o)
+{
+    float norm = o.get_norm();
+    Vector2 res = Vector2(o.x / norm, o.y / norm);
+    if (res.is_nan())
+    {
+        std::cout << "NaN in normalize" << std::endl;
+        abort();
+    }
+    return res;
 }
 
 float vector_distance(const Vector2 &a, const Vector2 &b)
 {
-    return vector_norm(sub_vector(a, b));
-}
-
-Vector2 normalize_vector(const Vector2 &a)
-{
-    float norm = vector_norm(a);
-    // return Vector2(a.x / norm, a.y / norm);
-    return { a.x / norm, a.y / norm };
+    return (a - b).get_norm();
 }
 
 Vector2 random_vector(float norm)
 {
-    float x = get_rand_float(-10, 10);
-    float y = get_rand_float(-10, 10);
+    float x = 0;
+    while (x == 0)
+        x = get_rand_float(-10, 10);
+    float y = 0;
+    while (y == 0)
+        y = get_rand_float(-10, 10);
 
-    Vector2 unit_vector = normalize_vector({ x, y });
-    return mul_vector(unit_vector, norm);
+    Vector2 res = normalize(Vector2(x, y)) * norm;
+    if (res.is_nan())
+    {
+        std::cout << "NaN in random vector" << std::endl;
+        abort();
+    }
+    return res;
 }
 
 bool interacting_object::has_attribute(const std::string &att)
 {
     return this->attribute == att;
     // return att.compare(this->attribute);
+}
+
+std::string interacting_object::get_attribute()
+{
+    return this->attribute;
 }
 
 /*
@@ -185,6 +237,7 @@ animal::animal(const std::string &file_path, SDL_Surface *window_surface_ptr)
     : interacting_object::interacting_object(window_surface_ptr, file_path)
 {
     this->hp = 600;
+    this->spd = random_vector(this->speed_norm);
     /*this->window_surface_ptr_ = window_surface_ptr;
     // this->image_ptr_ = load_surface_for(file_path,
     // this->window_surface_ptr);
@@ -234,20 +287,21 @@ wolf::wolf(SDL_Surface *window_surface_ptr)
 
 void wolf::interract(animal &other)
 {
+    this->hp--;
     if (other.has_attribute("sheep") == true)
     {
         float curr_distance = vector_distance(this->pos, other.pos);
         if (curr_distance < this->closest_dist)
         {
-            this->closest_sheep = sub_vector(this->pos, other.pos);
-            this->closest_dist = vector_norm(this->closest_sheep);
+            this->closest_sheep = other.pos - this->pos;
+            this->closest_dist = this->closest_sheep.get_norm();
         }
     }
     else if (other.has_attribute("dog") == true)
     {
-        Vector2 vector_to_dog = sub_vector(this->pos, other.pos);
+        Vector2 vector_to_dog = other.pos - this->pos;
         this->dog_position = vector_to_dog;
-        float distance_to_dog = vector_norm(vector_to_dog);
+        float distance_to_dog = vector_to_dog.get_norm();
         if (distance_to_dog < 100)
         {
             this->is_afraid = true;
@@ -259,42 +313,8 @@ void wolf::interract(animal &other)
     }
 }
 
-/*void wolf::detect(std::vector<std::unique_ptr<animal>> animals)
-{
-    sheep *closest;
-    Vector2 closest_vector;
-    float dist = 50000;
-    for (unsigned int i = 0; i < animals.size(); i++)
-    {
-        if (!animals[i]->has_attribute("sheep"))
-            continue;
-        float temp = vector_distance(this->pos, animals[i]->pos);
-        if (temp < dist)
-        {
-            dist = temp;
-            closest = animals[i];
-            closest_vector = sub_vector(animals[i]->pos, this->pos);
-        }
-    }
-    this->spd =
-        mul_vector(normalize_vector(closest_vector), (-1) * this->speed_norm);
-}*/
-
 void wolf::move()
 {
-    // srand(time(NULL));
-    // float newmovex = ((float) rand()/RAND_MAX )* 2 - 1;
-    // float newmovey = ((float) rand()/RAND_MAX )* 2 - 1;
-    this->hp--;
-    this->spd =
-        mul_vector(normalize_vector(this->closest_sheep), this->speed_norm);
-
-    if (this->is_afraid == true)
-    {
-        this->spd =
-            mul_vector(normalize_vector(this->dog_position), this->speed_norm);
-    }
-
     if (this->pos.x + this->spd.x < frame_boundary
         || this->pos.x + this->spd.x
             > frame_width - this->image_ptr_->w - frame_boundary)
@@ -315,18 +335,20 @@ sheep::sheep(SDL_Surface *window_surface_ptr)
     : animal::animal("media/sheep.png", window_surface_ptr)
 {
     if (get_rand_float(0, 1) > 0)
-        male = true;
+        male = false;
     else
     {
         cooldown = 0;
     }
     // std::cout << "sex is :" << male << std::endl;
     this->attribute = "sheep";
-    this->spd = random_vector(this->speed_norm);
+    // this->spd = random_vector(this->speed_norm);
 }
 
 void sheep::interract(animal &other)
 {
+    if (!this->cooldown == 0)
+        this->cooldown;
     if (other.has_attribute("wolf"))
     {
         float temp = vector_distance(this->pos, other.pos);
@@ -341,18 +363,22 @@ void sheep::interract(animal &other)
     if (other.has_attribute("sheep"))
     {
         if (other.male && !this->male
-            && vector_distance(this->pos, other.pos) < 80)
+            && vector_distance(this->pos, other.pos) < 80
+            && this->cooldown == 0)
             this->hp = 69;
     }
 }
 
 void sheep::move()
 {
-    if (this->dist_wolf < 300)
+    if (this->dist_wolf < 30)
     {
         this->spd =
-            mul_vector(normalize_vector(sub_vector(this->pos, this->pos)),
-                       this->speed_norm * 1.5);
+            normalize(this->pos - this->closest_wolf) * this->speed_norm * 1.5;
+    }
+    else
+    {
+        this->spd = normalize(this->spd) * this->speed_norm;
     }
     if (this->cooldown > 0)
         this->cooldown--;
@@ -380,20 +406,21 @@ dog::dog(SDL_Surface *window_surface_ptr)
 
 void dog::interract(animal &other)
 {
+    return;
     if (other.has_attribute("shepherd") == false)
         return;
 
-    Vector2 vector_to_player = sub_vector(this->pos, other.pos);
-    Vector2 unit_vector = normalize_vector(vector_to_player);
-    float distance_to_player = vector_norm(vector_to_player);
+    Vector2 vector_to_player = other.pos - this->pos;
+    Vector2 unit_vector = normalize(vector_to_player);
+    float distance_to_player = vector_to_player.get_norm();
 
     if (distance_to_player > this->circle_dist + 5)
     {
-        this->spd = mul_vector(unit_vector, this->speed_norm);
+        this->spd = unit_vector * this->speed_norm;
     }
     else if (distance_to_player < this->circle_dist - 5)
     {
-        this->spd = mul_vector(unit_vector, (-1) * this->speed_norm);
+        this->spd = unit_vector * (-1) * this->speed_norm;
     }
     else
     {
@@ -407,11 +434,19 @@ void dog::interract(animal &other)
         }
     }
 
-    this->spd = mul_vector(unit_vector, this->speed_norm);
+    this->spd = unit_vector * this->speed_norm;
 }
 
 void dog::move()
 {
+    if (this->pos.x + this->spd.x < frame_boundary
+        || this->pos.x + this->spd.x
+            > frame_width - this->image_ptr_->w - frame_boundary)
+        this->spd.x = -this->spd.x;
+    if (this->pos.y + this->spd.y < frame_boundary
+        || this->pos.y + this->spd.y
+            > frame_height - this->image_ptr_->h - frame_boundary)
+        this->spd.y = -this->spd.y;
     this->pos.x += this->spd.x;
     this->pos.y += this->spd.y;
 }
@@ -432,6 +467,9 @@ ground::~ground()
 
 void ground::update()
 {
+    std::vector<std::vector<std::unique_ptr<animal>>::iterator> dead;
+    std::vector<Vector2> babes;
+    std::vector<std::unique_ptr<animal>> babe;
     for (auto i = this->animals.begin(); i != this->animals.end(); i++)
     {
         for (auto j = this->animals.begin(); j != this->animals.end(); j++)
@@ -443,22 +481,37 @@ void ground::update()
         if (i->get()->has_attribute("sheep") && i->get()->hp == 69)
         {
             sheep *a = (sheep *)(i->get());
-            auto baby = new sheep(this->window_surface_ptr_);
-            this->animals.push_back(std::unique_ptr<animal>(baby));
-
+            // auto baby = new sheep(this->window_surface_ptr_);
+            babes.push_back(i->get()->pos);
+            // this->animals.push_back(std::unique_ptr<animal>(baby));
             std::cout << "added a baby: " << std::endl;
-            // this->add_animal(baby, true);
-            baby->pos.x = i->get()->pos.x;
-            baby->pos.y = i->get()->pos.y;
             a->cooldown = 3600;
             a->hp = 70;
-            baby->cooldown = 3600;
         }
         if (i->get()->hp == 0)
-            this->animals.erase(i);
+            dead.push_back(i);
+        // std::cout << i->get()->pos << std::endl;
+        if (i->get()->pos.is_nan())
+        {
+            std::cout << i->get()->get_attribute() << std::endl;
+        }
         i->get()->move();
         i->get()->draw();
     }
+    for (auto &i : dead)
+    {
+        this->animals.erase(i);
+    }
+
+    for (auto &i : babes)
+    {
+        sheep *new_sheep = new sheep(this->window_surface_ptr_);
+        new_sheep->pos = i;
+        new_sheep->cooldown = 3600;
+        this->animals.push_back(std::unique_ptr<animal>(new_sheep));
+    }
+    babes.clear();
+    dead.clear();
 }
 /*
 void ground::update()

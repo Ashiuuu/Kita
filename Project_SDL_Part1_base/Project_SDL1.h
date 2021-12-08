@@ -22,17 +22,26 @@ constexpr unsigned frame_boundary = 100;
 // Helper function to initialize SDL
 void init();
 
-struct Vector2
+class Vector2
 {
+public:
     float x;
     float y;
+
+    Vector2();
+    Vector2(float x, float y);
+
+    bool is_nan();
+
+    void operator+=(const Vector2 &a);
+    friend Vector2 operator-(const Vector2 &a, const Vector2 &o);
+    friend Vector2 operator*(const Vector2 &a, float b);
+    friend std::ostream &operator<<(std::ostream &o, const Vector2 &a);
+    float get_norm() const;
 };
 
-Vector2 sub_vector(const Vector2 &a, const Vector2 &b);
-Vector2 mul_vector(const Vector2 &a, float b);
-float vector_norm(const Vector2 &a);
+Vector2 normalize(const Vector2 &o);
 float vector_distance(const Vector2 &a, const Vector2 &b);
-Vector2 normalize_vector(const Vector2 &a);
 
 class animal;
 
@@ -46,6 +55,7 @@ public:
     Vector2 pos;
     Vector2 spd;
     bool has_attribute(const std::string &att);
+    std::string get_attribute();
     virtual void interract(animal &other){};
 
 protected:
