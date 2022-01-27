@@ -535,9 +535,14 @@ bool ground::update()
     }
     if (nbsheep == 0 || wolf == 0)
         return true;
-    std::cout << this->score << std::endl;
-    this->score = this->score + double(nbsheep);
-    this->score = this->score / 2.0;
+    if (this->frame == 60)
+    {
+        this->score = this->score + double(nbsheep);
+        this->score = this->score / 2.0;
+        this->frame = 0;
+    }
+    else
+        this->frame++;
     return false;
 }
 /*

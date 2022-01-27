@@ -157,6 +157,7 @@ private:
     // Attention, NON-OWNING ptr, again to the screen
     SDL_Surface *window_surface_ptr_;
     double score = 0.0;
+    double frame = 0.0;
     // Some attribute to store all the wolves and sheep
     // here
 
