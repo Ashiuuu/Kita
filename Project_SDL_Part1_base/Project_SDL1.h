@@ -140,7 +140,8 @@ private:
 class dog : public animal
 {
 private:
-    float circle_dist = 500;
+    float circle_dist = 200;
+    float phase = 0;
 
 public:
     dog(SDL_Surface *window_surface_ptr);
@@ -155,7 +156,7 @@ class ground
 private:
     // Attention, NON-OWNING ptr, again to the screen
     SDL_Surface *window_surface_ptr_;
-
+    double score = 0.0;
     // Some attribute to store all the wolves and sheep
     // here
 
@@ -165,7 +166,7 @@ public:
     dog *doggo;
     ground(SDL_Surface *window_surface_ptr); // todo: Ctor
     ~ground(); // todo: Dtor, again for clean up (if necessary)
-    void update(); // todo: "refresh the screen": Move animals and draw them
+    bool update(); // todo: "refresh the screen": Move animals and draw them
     // Possibly other methods, depends on your implementation
 };
 

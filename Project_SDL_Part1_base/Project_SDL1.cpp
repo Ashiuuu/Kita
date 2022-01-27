@@ -114,6 +114,10 @@ float Vector2::get_norm() const
 Vector2 normalize(const Vector2 &o)
 {
     float norm = o.get_norm();
+    if (norm == 0)
+    {
+        std::cout << "Norm = 0 in normalize" << std::endl;
+    }
     Vector2 res = Vector2(o.x / norm, o.y / norm);
     if (res.is_nan())
     {
@@ -287,22 +291,21 @@ wolf::wolf(SDL_Surface *window_surface_ptr)
 
 void wolf::interract(animal &other)
 {
-    this->hp--;
     if (other.has_attribute("sheep") == true)
     {
         float curr_distance = vector_distance(this->pos, other.pos);
         if (curr_distance < this->closest_dist)
         {
-            this->closest_sheep = other.pos - this->pos;
-            this->closest_dist = this->closest_sheep.get_norm();
+            this->closest_sheep = other.pos;
+            this->closest_dist = curr_distance;
         }
     }
     else if (other.has_attribute("dog") == true)
     {
         Vector2 vector_to_dog = other.pos - this->pos;
-        this->dog_position = vector_to_dog;
+        this->dog_position = other.pos;
         float distance_to_dog = vector_to_dog.get_norm();
-        if (distance_to_dog < 100)
+        if (distance_to_dog < 250)
         {
             this->is_afraid = true;
         }
@@ -315,6 +318,18 @@ void wolf::interract(animal &other)
 
 void wolf::move()
 {
+    if (this->hp != 0)
+        this->hp--;
+
+    this->spd = normalize(this->closest_sheep - this->pos) * this->speed_norm;
+    this->closest_dist = FLT_MAX;
+
+    if (this->is_afraid == true)
+    {
+        this->spd =
+            normalize(this->pos - this->dog_position) * this->speed_norm;
+    }
+
     if (this->pos.x + this->spd.x < frame_boundary
         || this->pos.x + this->spd.x
             > frame_width - this->image_ptr_->w - frame_boundary)
@@ -347,13 +362,14 @@ sheep::sheep(SDL_Surface *window_surface_ptr)
 
 void sheep::interract(animal &other)
 {
-    if (!this->cooldown == 0)
-        this->cooldown;
     if (other.has_attribute("wolf"))
     {
         float temp = vector_distance(this->pos, other.pos);
         if (temp < 80)
+        {
             this->hp = 0;
+            other.hp = 600;
+        }
         else if (temp < this->dist_wolf)
         {
             this->dist_wolf = temp;
@@ -371,17 +387,21 @@ void sheep::interract(animal &other)
 
 void sheep::move()
 {
-    if (this->dist_wolf < 30)
+    if (this->dist_wolf < 150)
     {
         this->spd =
             normalize(this->pos - this->closest_wolf) * this->speed_norm * 1.5;
+        // std::cout << this->spd.x << "," << this->spd.y << std::endl;
     }
     else
     {
         this->spd = normalize(this->spd) * this->speed_norm;
     }
-    if (this->cooldown > 0)
+
+    if (this->cooldown != 0)
+    {
         this->cooldown--;
+    }
 
     if (this->pos.x + this->spd.x < frame_boundary
         || this->pos.x + this->spd.x
@@ -393,6 +413,8 @@ void sheep::move()
         this->spd.y = -this->spd.y;
     this->pos.x += this->spd.x;
     this->pos.y += this->spd.y;
+
+    this->dist_wolf = FLT_MAX;
 }
 
 /*
@@ -406,49 +428,37 @@ dog::dog(SDL_Surface *window_surface_ptr)
 
 void dog::interract(animal &other)
 {
-    return;
     if (other.has_attribute("shepherd") == false)
         return;
-
-    Vector2 vector_to_player = other.pos - this->pos;
-    Vector2 unit_vector = normalize(vector_to_player);
-    float distance_to_player = vector_to_player.get_norm();
-
-    if (distance_to_player > this->circle_dist + 5)
-    {
-        this->spd = unit_vector * this->speed_norm;
-    }
-    else if (distance_to_player < this->circle_dist - 5)
-    {
-        this->spd = unit_vector * (-1) * this->speed_norm;
-    }
-    else
-    {
-        if (unit_vector.y < 0)
-        {
-            unit_vector.x = unit_vector.x * (-1);
-        }
-        else
-        {
-            unit_vector.y = unit_vector.y * (-1);
-        }
-    }
-
-    this->spd = unit_vector * this->speed_norm;
+    this->spd = Vector2(0, 0);
+    this->pos =
+        Vector2(other.pos.x + this->circle_dist * cos(this->phase / 50),
+                other.pos.y + this->circle_dist * sin(this->phase / 50));
 }
 
 void dog::move()
 {
-    if (this->pos.x + this->spd.x < frame_boundary
-        || this->pos.x + this->spd.x
-            > frame_width - this->image_ptr_->w - frame_boundary)
-        this->spd.x = -this->spd.x;
-    if (this->pos.y + this->spd.y < frame_boundary
-        || this->pos.y + this->spd.y
-            > frame_height - this->image_ptr_->h - frame_boundary)
-        this->spd.y = -this->spd.y;
-    this->pos.x += this->spd.x;
-    this->pos.y += this->spd.y;
+    if (this->pos.x < frame_boundary)
+        this->pos.x = frame_boundary;
+    else if (this->pos.x > frame_width - this->image_ptr_->w - frame_boundary)
+        this->pos.x = frame_width - this->image_ptr_->w - frame_boundary;
+    if (this->pos.y < frame_boundary)
+        this->pos.y = frame_boundary;
+    else if (this->pos.y > frame_height - this->image_ptr_->h - frame_boundary)
+        this->pos.y = frame_height - this->image_ptr_->h - frame_boundary;
+
+    this->phase++;
+
+    /*    if (this->pos.x + this->spd.x < frame_boundary
+             || this->pos.x + this->spd.x
+                 > frame_width - this->image_ptr_->w - frame_boundary)
+             this->spd.x = -this->spd.x;
+     if (this->pos.y + this->spd.y < frame_boundary
+         || this->pos.y + this->spd.y
+             > frame_height - this->image_ptr_->h - frame_boundary)
+         this->spd.y = -this->spd.y;
+     this->pos.x += this->spd.x;
+     this->pos.y += this->spd.y;*/
 }
 
 /*
@@ -461,11 +471,12 @@ ground::ground(SDL_Surface *window_surface_ptr)
 
 ground::~ground()
 {
+    std::cout << "Your score is " << this->score << std::endl;
     SDL_FreeSurface(this->window_surface_ptr_);
     delete (this->player);
 } // todo: Dtor, again for clean up (if necessary)
 
-void ground::update()
+bool ground::update()
 {
     std::vector<std::vector<std::unique_ptr<animal>>::iterator> dead;
     std::vector<Vector2> babes;
@@ -484,8 +495,7 @@ void ground::update()
             // auto baby = new sheep(this->window_surface_ptr_);
             babes.push_back(i->get()->pos);
             // this->animals.push_back(std::unique_ptr<animal>(baby));
-            std::cout << "added a baby: " << std::endl;
-            a->cooldown = 3600;
+            a->cooldown = 600;
             a->hp = 70;
         }
         if (i->get()->hp == 0)
@@ -512,6 +522,23 @@ void ground::update()
     }
     babes.clear();
     dead.clear();
+    int nbsheep = 0;
+    int wolf = 0;
+    for (auto i = this->animals.begin(); i != this->animals.end(); i++)
+    {
+        if (i->get()->has_attribute("sheep"))
+            nbsheep++;
+        else if (i->get()->has_attribute("wolf"))
+        {
+            wolf++;
+        }
+    }
+    if (nbsheep == 0 || wolf == 0)
+        return true;
+    std::cout << this->score << std::endl;
+    this->score = this->score + double(nbsheep);
+    this->score = this->score / 2.0;
+    return false;
 }
 /*
 void ground::update()
@@ -531,7 +558,8 @@ void ground::update()
     (wolf *)animals[i]->detect(this->animals);
     this->animals[i]->move();
     this->animals[i]->draw();
-    for (unsigned int i = 0; i < animals.size(); i++) // D’ailleurs, i++ ou ++i
+    for (unsigned int i = 0; i < animals.size(); i++) // D’ailleurs, i++ ou
+++i
 ?
 {
     if (!animals[i]->has_attribute("sheep"))
@@ -596,7 +624,8 @@ application::application(unsigned int n_sheep, unsigned int n_wolf)
     for (unsigned i = 0; i < n_wolf; ++i)
         this->my_ground->animals.push_back(
             std::unique_ptr<animal>(new wolf(this->window_surface_ptr_)));
-    // this->my_ground->animals.push_back(new wolf(this->window_surface_ptr_));
+    // this->my_ground->animals.push_back(new
+    // wolf(this->window_surface_ptr_));
 
     for (unsigned i = 0; i < n_sheep; ++i)
         this->my_ground->animals.push_back(
@@ -632,8 +661,11 @@ int application::loop(unsigned int period)
         SDL_FillRect(this->window_surface_ptr_, NULL,
                      SDL_MapRGB(this->window_surface_ptr_->format, 0, 255, 0));
 
-        this->my_ground->update();
-
+        bool ending = this->my_ground->update();
+        if (ending)
+        {
+            period = 0;
+        }
         SDL_UpdateWindowSurface(this->window_ptr_);
         unsigned int loop_end = SDL_GetTicks();
         unsigned int delta = loop_end - loop_begin;
