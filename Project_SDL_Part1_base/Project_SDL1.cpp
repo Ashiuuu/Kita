@@ -242,33 +242,7 @@ animal::animal(const std::string &file_path, SDL_Surface *window_surface_ptr)
 {
     this->hp = 600;
     this->spd = random_vector(this->speed_norm);
-    /*this->window_surface_ptr_ = window_surface_ptr;
-    // this->image_ptr_ = load_surface_for(file_path,
-    // this->window_surface_ptr);
-
-    this->file_path = file_path;
-    char *S = new char[file_path.length() + 1];
-    for (size_t i = 0; i < file_path.length(); i++)
-    {
-        S[i] = file_path[i];
-    }
-    S[file_path.length()] = 0;
-    this->image_ptr_ = load_surface_for(S, window_surface_ptr);
-*/
-    // 0 + boundary < x < frame_width - boundary
-    // 0 + boundary < y < frame_height - boundary
-    // this->pos = Vector2{frame_width / 2, frame_height / 2};
-
-    // this->spd = Vector2{((float) rand()/RAND_MAX )* 80 - 40, ((float)
-    // rand()/RAND_MAX )* 80 - 40};
-    // this->spd = Vector2{ 5, 5 };
 }
-
-/*animal::~animal()
-{
-    // C'est pas a animal de free le pointeur
-    SDL_FreeSurface(this->image_ptr_);
-}*/
 
 void animal::draw()
 {
@@ -355,9 +329,7 @@ sheep::sheep(SDL_Surface *window_surface_ptr)
     {
         cooldown = 0;
     }
-    // std::cout << "sex is :" << male << std::endl;
     this->attribute = "sheep";
-    // this->spd = random_vector(this->speed_norm);
 }
 
 void sheep::interract(animal &other)
@@ -391,7 +363,6 @@ void sheep::move()
     {
         this->spd =
             normalize(this->pos - this->closest_wolf) * this->speed_norm * 1.5;
-        // std::cout << this->spd.x << "," << this->spd.y << std::endl;
     }
     else
     {
@@ -448,17 +419,6 @@ void dog::move()
         this->pos.y = frame_height - this->image_ptr_->h - frame_boundary;
 
     this->phase++;
-
-    /*    if (this->pos.x + this->spd.x < frame_boundary
-             || this->pos.x + this->spd.x
-                 > frame_width - this->image_ptr_->w - frame_boundary)
-             this->spd.x = -this->spd.x;
-     if (this->pos.y + this->spd.y < frame_boundary
-         || this->pos.y + this->spd.y
-             > frame_height - this->image_ptr_->h - frame_boundary)
-         this->spd.y = -this->spd.y;
-     this->pos.x += this->spd.x;
-     this->pos.y += this->spd.y;*/
 }
 
 /*
@@ -467,14 +427,14 @@ Ground
 ground::ground(SDL_Surface *window_surface_ptr)
 {
     this->window_surface_ptr_ = window_surface_ptr;
-} // todo: Ctor
+}
 
 ground::~ground()
 {
     std::cout << "Your score is " << this->score << std::endl;
     SDL_FreeSurface(this->window_surface_ptr_);
     delete (this->player);
-} // todo: Dtor, again for clean up (if necessary)
+}
 
 bool ground::update()
 {
@@ -492,15 +452,13 @@ bool ground::update()
         if (i->get()->has_attribute("sheep") && i->get()->hp == 69)
         {
             sheep *a = (sheep *)(i->get());
-            // auto baby = new sheep(this->window_surface_ptr_);
             babes.push_back(i->get()->pos);
-            // this->animals.push_back(std::unique_ptr<animal>(baby));
+
             a->cooldown = 600;
             a->hp = 70;
         }
         if (i->get()->hp == 0)
             dead.push_back(i);
-        // std::cout << i->get()->pos << std::endl;
         if (i->get()->pos.is_nan())
         {
             std::cout << i->get()->get_attribute() << std::endl;
@@ -545,60 +503,6 @@ bool ground::update()
         this->frame++;
     return false;
 }
-/*
-void ground::update()
-{
-    player->move();
-    player->draw();
-
-    doggo->move(this->player->pos);
-    doggo->draw();
-    // for (auto &animal : this->animals) {
-    for (unsigned i = 0; i < this->animals.size(); ++i)
-    {
-        if (animals[i]->attribute.("sheep"))
-            (sheep *)animals[i]->detect(this->animals);
-        else if ()
-    }
-    (wolf *)animals[i]->detect(this->animals);
-    this->animals[i]->move();
-    this->animals[i]->draw();
-    for (unsigned int i = 0; i < animals.size(); i++) // D’ailleurs, i++ ou
-++i
-?
-{
-    if (!animals[i]->has_attribute("sheep"))
-        continue;
-    sheep *a = animals[i];
-    if (!a->male && a->cooldown == 0)
-    {
-        for (unsigned int k = 0; k < this->animals.size(); k++)
-        {
-
-        }
-    }
-}
-
-for (unsigned int i = 0; i < animals.size(); ++i)
-{
-    if (!animals[i]->has_attribute("wolf"))
-        continue;
-    for (auto j = this->animals.begin(); j != this->animals.end(); ++j)
-    {
-        if (!animals[j]->has_attribute("sheep"))
-            continue;
-        if (vector_distance(animals[i]->pos, (*j)->pos) < 80)
-        {
-            this->animals.erase(j);
-            break;
-        }
-    }
-}
-} // todo: "refresh the screen": Move animals and draw them
-*/
-/*
-Application
-*/
 
 application::application(unsigned int n_sheep, unsigned int n_wolf)
 {
@@ -623,14 +527,9 @@ application::application(unsigned int n_sheep, unsigned int n_wolf)
     this->my_ground->animals.push_back(
         std::unique_ptr<animal>(new shepherd(this->window_surface_ptr_)));
 
-    /*this->my_ground->animals.push_back(
-        new sheep(this->window_surface_ptr_));*/
-
     for (unsigned i = 0; i < n_wolf; ++i)
         this->my_ground->animals.push_back(
             std::unique_ptr<animal>(new wolf(this->window_surface_ptr_)));
-    // this->my_ground->animals.push_back(new
-    // wolf(this->window_surface_ptr_));
 
     for (unsigned i = 0; i < n_sheep; ++i)
         this->my_ground->animals.push_back(
